@@ -1,0 +1,9 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=1353
+
+This plugin is superseded by vimscript#1609.
+
+Improved Version of David A. Wheeler Ada Syntax Plugin. This Version has hightlight for attributes, knows about folding and makes better use of colors.
+
+Reports errors to: http://code.google.com/p/vim-scripts/issues/list
+Discuss improvements on: http://groups.google.com/group/vim_scripts
+There is also a Wiki site (http://ada.krischik.com/index.php/VIM/AdaMode) which describes the plugin in further detail.
