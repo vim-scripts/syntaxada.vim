@@ -1,22 +1,40 @@
 " Vim syntax file
-" Language:	Ada (95)
-" Maintainer:	David A. Wheeler <dwheeler@dwheeler.com>
-" URL: http://www.dwheeler.com/vim
-" Last Change:	2001-11-02
+" Language:	        Ada (2005)
+" Maintainer:	        Martin Krischik
+" URL:                  http://ada.krischik.com/index.php/VIM/AdaMode
+" Last Change:	        2005-10-13
 
-" Former Maintainer:	Simon Bradley <simon.bradley@pitechnology.com>
+" Former Maintainer:	David A. Wheeler <dwheeler@dwheeler.com>
+"                       http://www.dwheeler.com/vim
+"
+"                       Simon Bradley <simon.bradley@pitechnology.com>
 "			(was <sib93@aber.ac.uk>)
-" Other contributors: Preben Randhol.
-" The formal spec of Ada95 (ARM) is the "Ada95 Reference Manual".
-" For more Ada95 info, see http://www.gnuada.org and http://www.adapower.com.
+"
+" Other contributors:   Preben Randhol.
+" 
+" The formal spec of Ada 2005 (ARM) is the "Ada 2005 Reference Manual".
+" For more Ada 2005 info, see http://www.gnuada.org and http://www.adapower.com.
 
-" This vim syntax file works on vim 5.6, 5.7, 5.8 and 6.x.
+" This vim syntax file works on vim 5.6, 5.7, 5.8 6.x and 7.0
 " It implements Bram Moolenaar's April 25, 2001 recommendations to make
 " the syntax file maximally portable across different versions of vim.
 " If vim 6.0+ is available,
 " this syntax file takes advantage of the vim 6.0 advanced pattern-matching
 " functions to avoid highlighting uninteresting leading spaces in
 " some expressions containing "with" and "use".
+
+" Customize:
+"
+"    let g:ada_standard_types		= 1     Hilight standart types
+"    let g:ada_space_errors		= 1     Hilight space errors
+"    let g:ada_no_trail_space_error     = 1         - but not tail spaces
+"    let g:ada_no_tab_space_error       = 1         - but not tab use
+"    let g:ada_folding			= 1     Use folding
+"    let g:ada_abbrev			= 1     Add some abbrevs
+"    let g:ada_with_gnat_project_files	= 1     Add gnat project file keywords
+"    let g:ada_withuse_ordinary         = 1     no special use and with colors
+"    let g:ada_begin_preproc            = 1     special begin colors
+"    let g:ada_default_compiler         = gnat  set default compiler
 
 " For version 5.x: Clear all syntax items
 " For version 6.x: Quit when a syntax file was already loaded
@@ -74,10 +92,10 @@ syntax match adaAttribute "'\w\{2,\}\>"
 " However, if you want this highlighting, turn on "ada_standard_types".
 " For package Standard's definition, see ARM section A.1.
 
-if exists("ada_standard_types")
+if exists("g:ada_standard_types")
   syntax keyword adaBuiltinType	Boolean Integer Natural Positive Float
-  syntax keyword adaBuiltinType	Character Wide_Character
-  syntax keyword adaBuiltinType	String Wide_String
+  syntax keyword adaBuiltinType	Character Wide_Character Wide_Wide_Character
+  syntax keyword adaBuiltinType	String Wide_String Wide_Wide_String
   syntax keyword adaBuiltinType	Duration
   " These aren't listed in ARM section A.1's code, but they're noted as
   " options in ARM sections 3.5.4 and 3.5.7:
@@ -91,24 +109,23 @@ endif
 " determining when they're a type requires context in general.
 " One potential addition would be Unbounded_String.
 
+syntax keyword  adaLabel	others
 
-syntax keyword adaLabel		others
-
-syntax keyword adaOperator		abs mod not rem xor
-syntax match adaOperator		"\<and\>"
-syntax match adaOperator		"\<and\s\+then\>"
-syntax match adaOperator		"\<or\>"
-syntax match adaOperator		"\<or\s\+else\>"
-syntax match adaOperator		"[-+*/<>&]"
-syntax keyword adaOperator		**
-syntax match adaOperator		"[/<>]="
-syntax keyword adaOperator		=>
-syntax match adaOperator		"\.\."
-syntax match adaOperator		"="
+syntax keyword  adaOperator	abs mod not rem xor
+syntax match    adaOperator	"\<and\>"
+syntax match    adaOperator	"\<and\s\+then\>"
+syntax match    adaOperator	"\<or\>"
+syntax match    adaOperator	"\<or\s\+else\>"
+syntax match    adaOperator	"[-+*/<>&]"
+syntax keyword  adaOperator	**
+syntax match    adaOperator	"[/<>]="
+syntax keyword  adaOperator	=>
+syntax match    adaOperator	"\.\."
+syntax match    adaOperator	"="
 
 " Handle the box, <>, specially:
-syntax keyword adaSpecial	<>
-syntax match   adaSpecial	 "[:;().,]"
+syntax keyword  adaSpecial      <>
+syntax match    adaSpecial	 "[:;().,]"
 
 " We won't map "adaAssignment" by default, but we need to map ":=" to
 " something or the "=" inside it will be mislabelled as an operator.
@@ -138,11 +155,11 @@ syntax match adaError "/\*"
 syntax match adaError "=="
 
 
-if exists("ada_space_errors")
-  if !exists("ada_no_trail_space_error")
+if exists("g:ada_space_errors")
+  if !exists("g:ada_no_trail_space_error")
     syntax match   adaSpaceError     excludenl "\s\+$"
   endif
-  if !exists("ada_no_tab_space_error")
+  if !exists("g:ada_no_tab_space_error")
     syntax match   adaSpaceError     " \+\t"me=e-1
   endif
 endif
@@ -167,32 +184,36 @@ syntax match adaStatement	"\<abort\>"
 " match when the 'with' or 'null' is on a previous line).
 " We see the "end" in "end record" before the word record, so we match that
 " pattern as adaStructure (and it won't match the "record;" pattern).
-syntax match adaStructure	"\<record\>"
-syntax match adaStructure	"\<end\s\+record\>"
-syntax match adaKeyword	"\<record;"me=e-1
+syntax match adaStructure	 "\<record\>"
+syntax match adaStructure	 "\<end\s\+record\>"
+syntax match adaKeyword		 "\<record;"me=e-1
 
 syntax keyword adaStorageClass	abstract access aliased array at constant delta
 syntax keyword adaStorageClass	digits limited of private range tagged
-syntax keyword adaTypedef		subtype type
+syntax keyword adaStorageClass	interface synchronized
+syntax keyword adaTypedef	subtype type
 
 " Conditionals. "abort" after "then" is a conditional of its own.
-syntax match adaConditional	"\<then\>"
-syntax match adaConditional	"\<then\s\+abort\>"
-syntax match adaConditional	"\<else\>"
-syntax match adaConditional	"\<end\s\+if\>"
-syntax match adaConditional	"\<end\s\+case\>"
-syntax match adaConditional	"\<end\s\+select\>"
-syntax keyword adaConditional	if case select
-syntax keyword adaConditional	elsif when
+syntax match    adaConditional  "\<then\>"
+syntax match    adaConditional	"\<then\s\+abort\>"
+syntax match    adaConditional	"\<else\>"
+syntax match    adaConditional	"\<end\s\+if\>"
+syntax match    adaConditional	"\<end\s\+case\>"
+syntax match    adaConditional	"\<end\s\+select\>"
+syntax keyword  adaConditional	if case select
+syntax keyword  adaConditional	elsif when
 
-syntax keyword adaKeyword		all do exception in is new null out
-syntax keyword adaKeyword		separate until
+syntax keyword  adaKeyword      all do exception in is new null out
+syntax keyword  adaKeyword      separate until overriding
 
 " These keywords begin various constructs, and you _might_ want to
 " highlight them differently.
-syntax keyword adaBegin		begin body declare entry function generic
-syntax keyword adaBegin		package procedure protected renames task
+syntax keyword  adaBegin        begin body declare entry function generic
+syntax keyword  adaBegin	package procedure protected renames task
 
+if exists("ada_with_gnat_project_files")
+   syntax keyword adaBegin	project
+endif
 
 if exists("ada_withuse_ordinary")
    " Don't be fancy. Display "with" and "use" as ordinary keywords in all cases.
@@ -237,12 +258,10 @@ syntax keyword adaTodo contained	TODO FIXME XXX
 " Comments.
 syntax region  adaComment	oneline contains=adaTodo start="--"  end="$"
 
-
-
 " Define the default highlighting.
 " For version 5.7 and earlier: only when not done already
 " For version 5.8 and later: only when an item doesn't have highlighting yet
-if version >= 508 || !exists("did_ada_syn_inits")
+if version >= 508 || !exists("g:did_ada_syn_inits")
    if version < 508
       let did_ada_syn_inits = 1
       command -nargs=+ HiLink highlight link <args>
@@ -306,14 +325,17 @@ setlocal formatoptions+=ron
 :endif
 
 :if exists("g:ada_abbrev")
-:  iabbrev ret  return
-:  iabbrev proc procedure
-:  iabbrev pack package
-:  iabbrev func function
+   :iabbrev ret  return
+   :iabbrev proc procedure
+   :iabbrev pack package
+   :iabbrev func function
 :endif
 
 :let b:current_syntax = "ada"
 
-:compiler acs
+:if exists("b:ada_default_compiler")
+    :execute "compiler" g:ada_default_compiler
+:endif
 
-" vim: tabstop=8 softtabstop=3 shiftwidth=3 noexpandtab
+"vim: textwidth=78 nowrap tabstop=8 shiftwidth=3 softtabstop=3 noexpandtab
+"vim: filetype=vim encoding=latin1 fileformat=unix
